@@ -11,11 +11,12 @@
         -webkit-print-color-adjust: exact !important;
       }
 
-      #title {
+      .title {
         text-align: center;
       }
 
-      #grid {
+      .grid {
+        margin-top: 64px;
         display: grid;
         height: 100%;
         min-height: 600px;
@@ -24,7 +25,7 @@
         background-color: gray;
       }
 
-      #grid > .cell {
+      .grid > .cell {
         background-color: white;
         padding: 6px;
         display: flex;
@@ -38,29 +39,44 @@
         #controls {
           margin: 24px;
         }
+
+        #controls > label {
+          display: inline-flex;
+          flex-direction: column;
+        }
+
+        #controls > button {
+          display: block;
+          margin-top: 8px;
+        }
       }
 
       @media print {
         #controls {
           display: none;
         }
+
+        .grid {
+          page-break-after: always;
+        }
       }
     </style>
   </head>
   <body>
-    <h1 id="title">Visningsbingo</h1>
     <form id="controls">
       <label>Tittel <input type="text" id="controls__title" /></label>
+      <label>Antall brett <input type="number" id="controls__pages" /></label>
       <label
         >Bredde (kolonner) <input type="number" id="controls__cols"
       /></label>
       <label>Høyde (rader) <input type="number" id="controls__rows" /></label>
       <button>Generer ny</button>
     </form>
-    <div id="grid"></div>
+    <div id="content"></div>
     <script>
       const defaultValues = {
         title: "Visningsbingo",
+        pages: 1,
         rows: 5,
         cols: 5,
       };
@@ -69,46 +85,52 @@
 
       const controls = {
         title: document.getElementById("controls__title"),
+        pages: document.getElementById("controls__pages"),
         rows: document.getElementById("controls__rows"),
         cols: document.getElementById("controls__cols"),
       };
 
       function setControlValues(values) {
-        console.log('set control values', values)
         Object.entries(values).forEach(([key, value]) => {
-          console.log('setting', { key, value })
           controls[key].value = value;
         });
 
-        localStorage.setItem('controls', JSON.stringify(values));
+        localStorage.setItem("controls", JSON.stringify(values));
       }
 
       controlsForm.addEventListener("submit", (event) => {
         event.preventDefault();
 
         const values = {
+          pages: controls.pages.value,
           title: controls.title.value,
           cols: controls.cols.value,
           rows: controls.rows.value,
         };
 
         // Persist controls
-        localStorage.setItem('controls', JSON.stringify(values));
+        localStorage.setItem("controls", JSON.stringify(values));
 
         render(values);
       });
 
-      function render({ title, cols, rows }) {
-        document.title = title;
-        const h1 = document.getElementById('title');
-        h1.innerText = `Bingo: ${title} (${cols}x${rows})`;
+      function render({ pages, title, cols, rows }) {
+        document.title = `Bingo: ${title}`;
 
-        const grid = document.getElementById("grid");
-        grid.innerHTML = "";
+        const content = document.getElementById("content");
+        content.innerHTML = "";
 
-        grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        for (let page = 0; page < pages; page++) {
+          const h1 = document.createElement("h1");
+          h1.className = 'title';
+          h1.innerText = `${title} (${cols}x${rows})`;
 
-        const items = `
+          const grid = document.createElement("div");
+          grid.className = "grid";
+
+          grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+          const items = `
         Arealeffektiv
         Spør hvis du lurer på noe (gidder ikke selge leiligheten)
         Kan enkelt gjøres om til 3-roms
@@ -174,60 +196,72 @@
         Folk bruker møblene
         «Høy 1. etasje» (på bakkeplan)
       `
-          .trim()
-          .split("\n")
-          .map((s) => s.trim());
+            .trim()
+            .split("\n")
+            .map((s) => s.trim());
 
-        function sample(array, count) {
-          if (array.length < count) {
-            throw new Error("array length is < count", {
-              length: array.length,
-              count,
-            });
+          function sample(array, count) {
+            if (array.length < count) {
+              throw new Error("array length is < count", {
+                length: array.length,
+                count,
+              });
+            }
+
+            const copy = Array.from(array);
+            const ret = [];
+
+            while (ret.length < count) {
+              const index = Math.floor(Math.random() * copy.length);
+              const element = copy[index];
+              ret.push(element);
+              copy.splice(index, 1);
+            }
+
+            return ret;
           }
 
-          const copy = Array.from(array);
-          const ret = [];
+          const sampleCount = cols * rows;
 
-          while (ret.length < count) {
-            const index = Math.floor(Math.random() * copy.length);
-            const element = copy[index];
-            ret.push(element);
-            copy.splice(index, 1);
+          const sampled = sample(items, sampleCount);
+
+          for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+              const text = sampled[row * cols + col];
+
+              const cell = document.createElement("div");
+              cell.className = "cell";
+              cell.innerText = text;
+              grid.appendChild(cell);
+            }
           }
 
-          return ret;
+          const middleRow = Math.floor(rows / 2);
+          const middleCol = Math.floor(cols / 2);
+          const middleCell = "Stort potensiale";
+          grid.children[middleRow * cols + middleCol].innerText = middleCell;
+
+          content.appendChild(h1);
+          content.appendChild(grid);
         }
-
-        const sampleCount = cols * rows;
-
-        const sampled = sample(items, sampleCount);
-
-        for (let row = 0; row < rows; row++) {
-          for (let col = 0; col < cols; col++) {
-            const text = sampled[row * cols + col];
-
-            const cell = document.createElement("div");
-            cell.className = "cell";
-            cell.innerText = text;
-            grid.appendChild(cell);
-          }
-        }
-
-        const middleRow = Math.floor(rows / 2);
-        const middleCol = Math.floor(cols / 2);
-        const middleCell = "Stort potensiale";
-        grid.children[middleRow * cols + middleCol].innerText = middleCell;
       }
 
       function getPersistedControlsOr(fallback) {
-        const persisted = localStorage.getItem('controls');
+        const persistedJSON = localStorage.getItem("controls");
 
-        if (persisted == null) {
+        if (persistedJSON == null) {
           return fallback;
         }
 
-        return JSON.parse(persisted);
+        const persisted = JSON.parse(persistedJSON);
+
+        // Verify that all keys in the fallback are present in the persisted config
+        if (Object.keys(fallback).some((key) => persisted[key] == null)) {
+          console.log("Missing key; not using local storage");
+          return null;
+        }
+
+        return persisted;
       }
 
       // Restore config from localStorage, falling back to defaults
