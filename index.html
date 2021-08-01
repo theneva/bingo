@@ -4,9 +4,14 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <title>Bingo</title>
     <style>
       body {
+        font-family: 'Roboto', sans-serif;
+
         /* Enable background printing in Chrome */
         -webkit-print-color-adjust: exact !important;
       }
@@ -32,7 +37,7 @@
         justify-content: center;
         align-items: center;
         text-align: center;
-        font-size: 14pt;
+        font-size: 16pt;
       }
 
       @media not print {
@@ -236,10 +241,10 @@
             }
           }
 
-          const middleRow = Math.floor(rows / 2);
-          const middleCol = Math.floor(cols / 2);
-          const middleCell = "Stort potensiale";
-          grid.children[middleRow * cols + middleCol].innerText = middleCell;
+          // const middleRow = Math.floor(rows / 2);
+          // const middleCol = Math.floor(cols / 2);
+          // const middleCell = "Stort potensiale";
+          // grid.children[middleRow * cols + middleCol].innerText = middleCell;
 
           content.appendChild(h1);
           content.appendChild(grid);
