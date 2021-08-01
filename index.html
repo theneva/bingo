@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visningsbingo</title>
+    <style>
+      h1 {
+        text-align: center;
+        margin-bottom: 64px;
+      }
+
+      #grid {
+        display: grid;
+        height: 100%;
+        min-height: 600px;
+        grid-auto-rows: 1fr;
+        gap: 1px;
+        background-color: gray;
+      }
+
+      #grid > .cell {
+        background-color: white;
+        padding: 6px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Visningsbingo</h1>
+    <div id="grid"></div>
+    <script>
+      const width = 5;
+      const height = 5;
+
+      const grid = document.getElementById("grid");
+      grid.style.gridTemplateColumns = `repeat(${width}, 1fr)`;
+
+      const items = `
+        Arealeffektiv
+        Spør hvis du lurer på noe (gidder ikke selge leiligheten)
+        Kan enkelt gjøres om til 3-roms
+        Forteller ikke om byggeprosjekter i området
+        Feil som «ikke vært noe problem for selger»
+        «Velkommen til din neste bolig»
+        ≥ 15 år gammelt bad
+        Konstant mas fra megler
+        Lokkepris
+        Veldrevet borettslag/sameie
+        Twist på bordet
+        Megler forklarer hvorfor de ikke håndhilser
+        Megler oppgitt over koronaregler
+        Megler oppgitt over selger
+        «Selger vil egentlig ha {pris}»
+        «Vi gutta trenger jo…»
+        Megler snakker bare til én person på visning (mannen)
+        «Det må jeg sjekke med selger»
+        Stygg skade som ikke er nevnt i annonsen eller prospektet
+        «Du hører ikke naboene» (i en blokk)
+        Stille omgivelser
+        Lite gjennomtrekk
+        Smarte romløsninger
+        «Fjordgløtt»
+        Stilige detaljer (bare skrot)
+        Skap fulle av rot
+        Skapdører som ikke fungerer
+        Dusjdør kan ikke åpnes ordentlig
+        WC så nærme veggen at man ikke kan sitte der
+        Lamper som ikke er koblet i
+        Ingen TV
+        Vaskemaskin uten opplegg
+        Håndkle-stige
+        Høye speil/bilder som dekker over skade
+        Tepper som dekker skade
+        Megler klager over FINN
+        Stressa megler
+        2 meglere (i en 2-roms)
+        «Jeg bor i nabolaget selv»
+        «Oslos beste X» (nabolag, blokk, borettslag)
+        Åpenbar vidvinkel på bildene
+        Veldig fordelaktige perspektiver på bildene
+        Mangelfulle bilder
+        Ting som ikke virker
+        Puter puter puter puter
+        Megler ekstremt fokusert på én ting
+        Får ikke se bod(er)
+        Megler vet ikke hvor sykkelbod/vaskeri er
+        Forsinka megler
+        Prospekt uten plantegning først
+        Tomt for prospekter
+        Prospekter printet på A4-ark
+        «Populært område»
+        «Hipt»
+        Sentralt (utenfor Ring 3)
+        Gode kollektivmuligheter (≥ 15 min gange unna)
+        Skjeve gulv (ikke opplyst)
+        «Fin balkong» (brannbalkong eller fransk balkong)
+        Vil ikke fortelle antall interessenter
+        Personlige spørsmål
+        Mor med uinteressert barn på visning
+        «Byhytte»
+        Folk bruker møblene
+        «Høy 1. etasje» (på bakkeplan)
+      `
+        .trim()
+        .split("\n")
+        .map((s) => s.trim());
+
+      function sample(array, count) {
+        if (array.length < count) {
+          throw new Error("array length is < count", {
+            length: array.length,
+            count,
+          });
+        }
+
+        const copy = Array.from(array);
+        const ret = [];
+
+        while (ret.length < count) {
+          const index = Math.floor(Math.random() * copy.length);
+          const element = copy[index];
+          ret.push(element);
+          copy.splice(index, 1);
+        }
+
+        return ret;
+      }
+
+      const sampleCount = width * height;
+
+      const sampled = sample(items, sampleCount);
+
+      for (let row = 0; row < height; row++) {
+        for (let col = 0; col < width; col++) {
+          const text = sampled[row * width + col];
+
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.innerText = text;
+          grid.appendChild(cell);
+        }
+      }
+
+      const middleRow = Math.floor(height / 2);
+      const middleCol = Math.floor(width / 2);
+      const middleCell = "Stort potensiale";
+      grid.children[middleRow * width + middleCol].innerText = middleCell;
+    </script>
+  </body>
+</html>
